@@ -1184,6 +1184,9 @@ class SearchController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControlle
 			// Configure highlight fields.
 			$highlight->addFields(implode(',', $highlightConfig['fields']));
 
+			// Configure the maximum number of highlighted snippets.
+			$highlight->setSnippets($highlightConfig['snippets']);
+			
 			// Configure the fragement length.
 			$highlight->setFragSize($highlightConfig['fragsize']);
 
