@@ -171,6 +171,7 @@ class SearchController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControlle
 
 			$this->addQueryInformationAsJavaScript($this->requestArguments['q']);
 			$this->addStandardAssignments();
+			$this->addSolrRequestToDebug($resultSet);
 		}
 	}
 
@@ -558,6 +559,8 @@ class SearchController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControlle
 		$this->addTypoScriptFilters($query);
 
 		$this->createQueryComponents($query);
+
+		$query->setOmitHeader($this->settings['omitHeader']);
 
 		$this->configuration['solarium'] = $query;
 
@@ -1504,6 +1507,17 @@ class SearchController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControlle
 
 		die();
 
+	}
+
+	/**
+	 * Adds request uri to debug output.
+	 */
+	private function addSolrRequestToDebug($result) {
+
+		if (array_key_exists('debug', $this->requestArguments)) {
+			$this->view->assign('solrRequest', $this->solr->getEndpoint()->getBaseUri(). $result->getQuery()->getRequestBuilder()->build($result->getQuery())->getUri());
+		}
+		
 	}
 
 }

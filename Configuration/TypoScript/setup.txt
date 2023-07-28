@@ -7,6 +7,7 @@ plugin.tx_find {
 			timeout = {$plugin.tx_find.settings.connection.timeout}
 			scheme = {$plugin.tx_find.settings.connection.scheme}
 		}
+		omitHeader = true
 		queryFields {
 			0 {
 				id = default
