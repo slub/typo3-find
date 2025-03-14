@@ -1358,6 +1358,17 @@ class SolrServiceProvider extends AbstractServiceProvider
                     $magicFieldPrefix = '';
                 }
 
+                if ($fieldInfo['escape']) {
+
+                    if ($fieldInfo['escape']['whitespace'] && $fieldInfo['escape']['whitespace'] == '1') {
+                        foreach ($queryTerms as $key => $term) {
+                            $queryTerms[$key] = str_replace(' ', '\\'.' ', $queryTerms[$key]);
+                        }
+
+                    }
+
+                }
+
                 if (2 === (int) $fieldInfo['noescape']) {
                     $chars = explode(',', $fieldInfo['escapechar']);
                     foreach ($queryTerms as $key => $term) {
