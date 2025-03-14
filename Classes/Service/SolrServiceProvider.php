@@ -1247,7 +1247,7 @@ class SolrServiceProvider extends AbstractServiceProvider
                 if (!$message) {
                     $message = sprintf('»detail« action query for id »%s« returned no results.', $id);
                 }
-                $this->logger->error($message, ['arguments' => $this->getRequestArguments()]);
+                $this->logger->info($message, ['arguments' => $this->getRequestArguments()]);
                 $assignments['error'] = ['solr' => $message];
             }
         } catch (HttpException $httpException) {
