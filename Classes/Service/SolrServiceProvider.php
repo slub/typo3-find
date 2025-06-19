@@ -867,6 +867,8 @@ class SolrServiceProvider extends AbstractServiceProvider
 			}
 		}
 
+        $this->settings['omitHeader'] = filter_var($this->settings['omitHeader'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
         $this->query->setOmitHeader($this->settings['omitHeader']);
 
         $this->setConfigurationValue('solarium', $this->query);
