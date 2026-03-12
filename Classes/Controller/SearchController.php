@@ -130,8 +130,23 @@ class SearchController extends ActionController
             $this->addStandardAssignments();
             $defaultQuery = $this->searchProvider->getDefaultQuery();
 
+            // Decode facet keys for display
+            $arguments = $this->searchProvider->getRequestArguments();
+            if (isset($arguments['facet']) && is_array($arguments['facet'])) {
+                foreach ($arguments['facet'] as $facetId => $facetTerms) {
+                    if (is_array($facetTerms)) {
+                        $decodedTerms = [];
+                        foreach ($facetTerms as $term => $value) {
+                            $decodedTerm = urldecode($term);
+                            $decodedTerms[$decodedTerm] = $value;
+                        }
+                        $arguments['facet'][$facetId] = $decodedTerms;
+                    }
+                }
+            }
+
             $viewValues = [
-                'arguments' => $this->searchProvider->getRequestArguments(),
+                'arguments' => $arguments,
                 'config' => $this->searchProvider->getConfiguration(),
             ];
 

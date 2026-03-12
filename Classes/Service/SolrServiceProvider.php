@@ -520,7 +520,18 @@ class SolrServiceProvider extends AbstractServiceProvider
             }
         }
 
-        return $activeFacetsForTemplate;
+        // Decode facet keys and term values for template display
+        $decodedActiveFacets = [];
+        foreach ($activeFacetsForTemplate as $facetID => $facets) {
+            $decodedActiveFacets[$facetID] = [];
+            foreach ($facets as $facetTerm => $facetInfo) {
+                $decodedTerm = urldecode($facetTerm);
+                $facetInfo['term'] = $decodedTerm;
+                $decodedActiveFacets[$facetID][$decodedTerm] = $facetInfo;
+            }
+        }
+
+        return $decodedActiveFacets;
     }
 
     /**
@@ -1057,6 +1068,8 @@ class SolrServiceProvider extends AbstractServiceProvider
                     $queryPattern = ($facetConfig['field'] ?: $facetConfig['id']).':'.'%s';
                 }
 
+                $queryTerm = urldecode($queryTerm);
+                
                 // Hack: convert strings »RANGE XX TO YY« Solr style range queries »[XX TO YY]«
                 // (because PHP loses ] in array keys during URL parsing)
                 $queryTerm = preg_replace('#RANGE (.*) TO (.*)#', '[\1 TO \2]', $queryTerm);
