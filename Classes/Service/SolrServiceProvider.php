@@ -155,6 +155,7 @@ class SolrServiceProvider extends AbstractServiceProvider
             $this->timing['INDEX_AFTER_BeforeRender_SLOT'] = $this->timeTracker->getDifferenceToStarttime();
 
             $assignments = [
+                'query' => $this->query,
                 'results' => $resultSet,
                 'error' => $error,
                 'timing' => $this->timing
@@ -162,7 +163,7 @@ class SolrServiceProvider extends AbstractServiceProvider
            	
             // Add request URI to debug output.
             if (array_key_exists('debug', $this->requestArguments)) {
-                $assignments['solrRequest'] = $this->connection->getEndpoint()->getBaseUri(). $resultSet->getQuery()->getRequestBuilder()->build($resultSet->getQuery())->getUri();
+                $assignments['solrRequest'] = $this->connection->getEndpoint()->getBaseUri() . $this->query->getRequestBuilder()->build($this->query)->getUri();
             }
 
             $this->timing['BEFORE_RENDER'] =  $this->timing['INDEX_AFTER_BeforeRender_SLOT'];
@@ -286,7 +287,8 @@ class SolrServiceProvider extends AbstractServiceProvider
             $result = ((bool) $this->requestArguments['extended']);
         } elseif (array_key_exists('q', $this->requestArguments)) {
             foreach ($this->settings['queryFields'] as $fieldInfo) {
-                if ($fieldInfo['extended']
+                if (is_array($fieldInfo)
+                    && $fieldInfo['extended']
                     && array_key_exists($fieldInfo['id'], $this->requestArguments['q'])
                     && $this->requestArguments['q'][$fieldInfo['id']]
                 ) {
