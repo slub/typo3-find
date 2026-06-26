@@ -708,6 +708,10 @@ class SolrServiceProvider extends AbstractServiceProvider
                     }
                 }
             }
+            // Configure highlighting method (see https://solr.apache.org/guide/solr/latest/query-guide/highlighting.html#choosing-a-highlighter)
+            if ($highlightConfig['method'] && in_array($highlightConfig['method'], [$highlight::METHOD_ORIGINAL, $highlight::METHOD_UNIFIED, $highlight::METHOD_FASTVECTOR])) {
+                $highlight->setMethod($highlightConfig['method']);
+            }
 
             // Set up prefix and postfix.
             $highlight->setSimplePrefix('\ueeee');
