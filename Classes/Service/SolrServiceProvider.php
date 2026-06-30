@@ -1389,7 +1389,18 @@ class SolrServiceProvider extends AbstractServiceProvider
                         foreach ($queryTerms as $key => $term) {
                             $queryTerms[$key] = str_replace(' ', '\\'.' ', $queryTerms[$key]);
                         }
+                    }
 
+                    if ($fieldInfo['escape']['parenthesis'] && $fieldInfo['escape']['parenthesis'] == 1) {
+                        foreach ($queryTerms as $key => $term) {
+                            $queryTerms[$key] = str_replace(['(', ')'], ['\(', '\)'], $queryTerms[$key]);
+                        }
+                    }
+
+                    if ($fieldInfo['escape']['escape'] && $fieldInfo['escape']['escape'] == 1) {
+                        foreach ($queryTerms as $key => $term) {
+                            $queryTerms[$key] = str_replace('\\', '\\\\', $queryTerms[$key]);
+                        }
                     }
 
                 }
