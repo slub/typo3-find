@@ -877,9 +877,10 @@ class SolrServiceProvider extends AbstractServiceProvider
         $this->addTypoScriptFilters();
         $this->addDefaultQueryOperator();
 
-        if(is_array($this->settings['shards']) && count($this->settings['shards'])) {
+        $shards = $this->settings['connections'][$this->connectionName]['options']['shards'] ?? null;
+        if(is_array($shards) && count($shards)) {
 			$distributedSearch = $this->query->getDistributedSearch();
-			foreach($this->settings['shards'] as $name => $shard) {
+			foreach($shards as $name => $shard) {
 				$distributedSearch->addShard($name, $shard);
 			}
 		}
