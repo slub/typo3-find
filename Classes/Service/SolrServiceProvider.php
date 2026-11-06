@@ -164,6 +164,9 @@ class SolrServiceProvider extends AbstractServiceProvider
             // Add request URI to debug output.
             if (array_key_exists('debug', $this->requestArguments)) {
                 $assignments['solrRequest'] = $this->connection->getEndpoint()->getBaseUri() . $this->query->getRequestBuilder()->build($this->query)->getUri();
+                $this->query->setOmitHeader(false);
+                $this->query->addParam('debug', 'true');
+                $assignments['solrRequestDebug'] = $this->connection->getEndpoint()->getBaseUri() . $this->query->getRequestBuilder()->build($this->query)->getUri();
             }
 
             $this->timing['BEFORE_RENDER'] =  $this->timing['INDEX_AFTER_BeforeRender_SLOT'];
