@@ -120,11 +120,9 @@ class CountFromSolrViewHelper extends AbstractViewHelper
     private function createQueryComponents(&$query)
     {
         // Shards
-        $activeConnection = $this->templateVariableContainer->get('settings')['activeConnection'] ?? 'default';
-        $shards = $this->templateVariableContainer->get('settings')['connections'][$activeConnection]['options']['shards'] ?? null;
-        if (is_array($shards) && count($shards)) {
+        if ($this->templateVariableContainer->get('settings')['shards'] && count($this->templateVariableContainer->get('settings')['shards'])) {
             $distributedSearch = $query->getDistributedSearch();
-            foreach ($shards as $name => $shard) {
+            foreach ($this->templateVariableContainer->get('settings')['shards'] as $name => $shard) {
                 $distributedSearch->addShard($name, $shard);
             }
         }
