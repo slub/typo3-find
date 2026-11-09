@@ -162,11 +162,16 @@ class SolrServiceProvider extends AbstractServiceProvider
             ];
            	
             // Add request URI to debug output.
-            if (array_key_exists('debug', $this->requestArguments)) {
+            $isDebug = array_key_exists('debug', $this->requestArguments)
+                ? filter_var($this->requestArguments['debug'], FILTER_VALIDATE_BOOL)
+                : filter_var($this->settings['debug'], FILTER_VALIDATE_BOOL);
+            if ($isDebug) {
                 $assignments['solrRequest'] = $this->connection->getEndpoint()->getBaseUri() . $this->query->getRequestBuilder()->build($this->query)->getUri();
                 $this->query->setOmitHeader(false);
                 $this->query->addParam('debug', 'true');
                 $assignments['solrRequestDebug'] = $this->connection->getEndpoint()->getBaseUri() . $this->query->getRequestBuilder()->build($this->query)->getUri();
+                $this->query->setOmitHeader(true);
+                $this->query->removeParam('debug');
             }
 
             $this->timing['BEFORE_RENDER'] =  $this->timing['INDEX_AFTER_BeforeRender_SLOT'];
