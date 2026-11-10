@@ -155,14 +155,23 @@ class SolrServiceProvider extends AbstractServiceProvider
             $this->timing['INDEX_AFTER_BeforeRender_SLOT'] = $this->timeTracker->getDifferenceToStarttime();
 
             $assignments = [
+                'query' => $this->query,
                 'results' => $resultSet,
                 'error' => $error,
                 'timing' => $this->timing
             ];
            	
             // Add request URI to debug output.
-            if (array_key_exists('debug', $this->requestArguments)) {
-                $assignments['solrRequest'] = $this->connection->getEndpoint()->getBaseUri(). $resultSet->getQuery()->getRequestBuilder()->build($resultSet->getQuery())->getUri();
+            $isDebug = array_key_exists('debug', $this->requestArguments)
+                ? filter_var($this->requestArguments['debug'], FILTER_VALIDATE_BOOL)
+                : filter_var($this->settings['debug'], FILTER_VALIDATE_BOOL);
+            if ($isDebug) {
+                $assignments['solrRequest'] = $this->connection->getEndpoint()->getBaseUri() . $this->query->getRequestBuilder()->build($this->query)->getUri();
+                $this->query->setOmitHeader(false);
+                $this->query->addParam('debug', 'true');
+                $assignments['solrRequestDebug'] = $this->connection->getEndpoint()->getBaseUri() . $this->query->getRequestBuilder()->build($this->query)->getUri();
+                $this->query->setOmitHeader(true);
+                $this->query->removeParam('debug');
             }
 
             $this->timing['BEFORE_RENDER'] =  $this->timing['INDEX_AFTER_BeforeRender_SLOT'];
@@ -286,7 +295,8 @@ class SolrServiceProvider extends AbstractServiceProvider
             $result = ((bool) $this->requestArguments['extended']);
         } elseif (array_key_exists('q', $this->requestArguments)) {
             foreach ($this->settings['queryFields'] as $fieldInfo) {
-                if ($fieldInfo['extended']
+                if (is_array($fieldInfo)
+                    && $fieldInfo['extended']
                     && array_key_exists($fieldInfo['id'], $this->requestArguments['q'])
                     && $this->requestArguments['q'][$fieldInfo['id']]
                 ) {
@@ -706,6 +716,9 @@ class SolrServiceProvider extends AbstractServiceProvider
                     }
                 }
             }
+            if ($highlightConfig['method'] && in_array($highlightConfig['method'], [$highlight::METHOD_ORIGINAL, $highlight::METHOD_UNIFIED, $highlight::METHOD_FASTVECTOR])) {
+                $highlight->setMethod($highlightConfig['method']);
+            }
 
             // Set up prefix and postfix.
             $highlight->setSimplePrefix('\ueeee');
@@ -871,9 +884,10 @@ class SolrServiceProvider extends AbstractServiceProvider
         $this->addTypoScriptFilters();
         $this->addDefaultQueryOperator();
 
-        if(is_array($this->settings['shards']) && count($this->settings['shards'])) {
+        $shards = $this->settings['connections'][$this->connectionName]['options']['shards'] ?? null;
+        if(is_array($shards) && count($shards)) {
 			$distributedSearch = $this->query->getDistributedSearch();
-			foreach($this->settings['shards'] as $name => $shard) {
+			foreach($shards as $name => $shard) {
 				$distributedSearch->addShard($name, $shard);
 			}
 		}
@@ -1383,7 +1397,18 @@ class SolrServiceProvider extends AbstractServiceProvider
                         foreach ($queryTerms as $key => $term) {
                             $queryTerms[$key] = str_replace(' ', '\\'.' ', $queryTerms[$key]);
                         }
+                    }
 
+                    if ($fieldInfo['escape']['parenthesis'] && $fieldInfo['escape']['parenthesis'] == 1) {
+                        foreach ($queryTerms as $key => $term) {
+                            $queryTerms[$key] = str_replace(['(', ')'], ['\(', '\)'], $queryTerms[$key]);
+                        }
+                    }
+
+                    if ($fieldInfo['escape']['escape'] && $fieldInfo['escape']['escape'] == 1) {
+                        foreach ($queryTerms as $key => $term) {
+                            $queryTerms[$key] = str_replace('\\', '\\\\', $queryTerms[$key]);
+                        }
                     }
 
                 }
